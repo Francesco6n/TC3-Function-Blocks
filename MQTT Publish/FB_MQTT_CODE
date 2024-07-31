@@ -1,0 +1,51 @@
+//Parametrization of the mqtt function block
+fb_IotMqttClient.sClientId    := i_ClientID;
+fb_IotMqttClient.sHostName    := i_HostName;
+fb_IotMqttClient.nHostPort    := i_HostPort;
+fb_IotMqttClient.sTopicPrefix := i_Prefix;
+
+//Connection enable
+fb_IotMqttClient.Execute(bConnect := TRUE);
+
+//Call of function block for publish interval
+fb_AltOutputs(
+	i_Enable := TRUE, 
+	i_Time1  := i_Interval/2, 
+	i_Time2  := i_Interval/2, 
+	o_Output1 => , 
+	o_Output2 => );
+	
+//Enable check
+IF fb_AltOutputs.o_Output1 = TRUE 
+AND CasePublication = 0 
+AND i_Interval <> T#0MS 
+AND i_Prefix <> '' 
+AND i_StringsNumber > 0 THEN
+	CasePublication := 1;
+END_IF
+
+//Case start
+CASE CasePublication OF
+1: //Data write
+IF fb_IotMqttClient.bConnected = TRUE THEN
+	FOR WritingIndex := 1 TO i_StringsNumber DO
+		StringToPublish := i_StringsArray[WritingIndex];
+		Topic := INT_TO_STRING(WritingIndex);
+		fb_IotMqttClient.Publish(
+			sTopic       := Topic, 
+			pPayload     := ADR(StringToPublish), 
+			nPayloadSize := LEN(StringToPublish), 
+			eQoS         := TcIotMqttQos.AtMostOnceDelivery, 
+			bRetain      := FALSE, 
+			bQueue       := FALSE,);
+	END_FOR
+END_IF
+IF WritingIndex > i_StringsNumber THEN
+	CasePublication := 2;
+END_IF
+
+2: //Wait for another publish
+IF fb_AltOutputs.o_Output1 = FALSE THEN
+	CasePublication := 0;
+END_IF
+END_CASE

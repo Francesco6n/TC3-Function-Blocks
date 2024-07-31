@@ -1,0 +1,16 @@
+//Avoid ZERO division
+IF (i_MaximumValue - i_MinimumValue) <> 0 THEN
+	//Check if value is positive (Ex: 0, 1000)
+	IF i_MinimumValue >= 0 THEN
+		Scale := (i_MaximumRAW - i_MinimumRAW) / (i_MaximumValue - i_MinimumValue);
+		IF Scale <> 0 THEN
+			o_Value := i_ActualRAW / Scale;
+		END_IF
+		//Check if value is negative (Ex: -100, 900)
+		ELSIF i_MinimumValue < 0 THEN
+			Scale := (i_MaximumRAW - i_MinimumRAW) / (i_MaximumValue + (i_MinimumValue * -1));
+			IF Scale <> 0 THEN
+				o_Value := (i_ActualRAW / Scale) + i_MinimumValue;
+			END_IF
+	END_IF
+END_IF

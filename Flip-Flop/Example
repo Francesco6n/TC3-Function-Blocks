@@ -1,0 +1,23 @@
+//Example 1: push a button to power on a led, push the same button again to power off the led
+fb_FlipFlop1(
+	i_Enable := TRUE, 
+	i_Signal := (*BUTTON*), 
+	i_Reset  := , 
+	o_Output => (*LED*));
+	
+//Example 2: push a button to power on a motor, push the same button again to power off the motor
+//Connect a thermal protection on the reset input, if the motor gets hot, it will power off automatically
+fb_FlipFlop2(
+	i_Enable := TRUE, 
+	i_Signal := (*BUTTON*), 
+	i_Reset  := (*THERMAL PROTECTION*), 
+	o_Output => (*MOTOR*));
+	
+//Example 3: push a button to power on a motor, push the same button again to power off the motor
+//Connect a thermal protection on the reset input, if the motor gets hot, it will power off automatically
+//Connect the "fence closed" signal to the enable to prevent the accidentally power on
+fb_FlipFlop3(
+	i_Enable := (*FENCE CLOSED*), 
+	i_Signal := (*BUTTON*), 
+	i_Reset  := (*THERMAL PROTECTION*), 
+	o_Output => (*MOTOR*));

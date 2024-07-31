@@ -1,0 +1,195 @@
+//Initialization of function blocks
+fb_FileOpen    ();
+fb_MultiConcat ();
+fb_FileWrite   ();
+fb_FileClose   ();
+
+//Call of interval function block
+fb_AltOutputs(
+	i_Enable := TRUE, 
+	i_Time1  := i_Interval / 2, 
+	i_Time2  := i_Interval / 2, 
+	o_Output1 => , 
+	o_Output2 => );
+
+//Procedure reset
+IF i_Enable = FALSE OR fb_AltOutputs.o_Output1 = FALSE THEN
+	fb_FileOpen.bExecute    := FALSE;
+	fb_FileWrite.bExecute   := FALSE;
+	fb_FileClose.bExecute   := FALSE;
+	fb_MultiConcat.i_Enable := FALSE;
+	CaseWriting             := 0;
+END_IF
+
+//Enable check
+IF i_Enable = TRUE AND fb_AltOutputs.o_Output1 = TRUE AND CaseWriting = 0 THEN
+	CaseWriting := 10;
+END_IF
+
+//Case start
+CASE CaseWriting OF
+10: //Add of the ";" character
+FOR ElaborationIndex := 1 TO 64 DO
+	ElaboratedArray[(ElaborationIndex*2)-1] := i_StringsArray[ElaborationIndex];
+	ElaboratedArray[ElaborationIndex*2]     := ';';
+END_FOR
+CaseWriting := 20;
+
+20: //Generating date
+//Year
+DateArray[1] := WORD_TO_STRING(i_TimeStruct.wYear);
+//Month + conversion in double figure
+IF i_TimeStruct.wMonth < 10 THEN
+	DateArray[2] := CONCAT('0',WORD_TO_STRING(i_TimeStruct.wMonth));
+	ELSE
+	DateArray[2] := WORD_TO_STRING(i_TimeStruct.wMonth);
+END_IF
+//Day + conversion in double figure
+IF i_TimeStruct.wDay < 10 THEN
+	DateArray[3] := CONCAT('0',WORD_TO_STRING(i_TimeStruct.wDay));
+	ELSE
+	DateArray[3] := WORD_TO_STRING(i_TimeStruct.wDay);
+END_IF
+IF DateArray[1] <> '' AND DateArray[2] <> '' AND DateArray[3] <> '' THEN
+	CaseWriting          := 30;
+END_IF
+	
+30: //Generating full directory array for multiconcat
+MultiConcatString[1] := i_Directory;
+MultiConcatString[2] := i_FileName;
+MultiConcatString[3] := '_';
+MultiConcatString[4] := DateArray[1];
+MultiConcatString[5] := DateArray[2];
+MultiConcatString[6] := DateArray[3];
+MultiConcatString[7] := '.';
+MultiConcatString[8] := i_FileExtension;
+//Execution of multiconcat
+fb_MultiConcat.i_StringsArray  := MultiConcatString;
+fb_MultiConcat.i_StringsNumber := 8;
+fb_MultiConcat.i_Enable        := TRUE;
+//Wait for multiconcat done
+IF fb_MultiConcat.o_String <> '' THEN
+	ElaboratedDirectory         := fb_MultiConcat.o_String;
+	fb_MultiConcat.i_Enable := FALSE;
+	CaseWriting              := 100;
+END_IF
+
+100: //Creation of the file
+fb_FileOpen.sPathName := ElaboratedDirectory;
+fb_FileOpen.nMode     := FOPEN_MODEAPPEND OR FOPEN_MODEPLUS;
+fb_FileOpen.ePath     := PATH_GENERIC;
+fb_FileOpen.tTimeout  := T#5S;
+fb_FileOpen.bExecute  := TRUE;
+IF fb_FileOpen.bBusy = TRUE THEN
+	CaseWriting := 200;
+END_IF
+
+200: //Check for errors
+IF fb_FileOpen.bBusy = FALSE AND fb_FileOpen.bError = FALSE AND fb_FileOpen.hFile <> 0 THEN
+	HeaderFile           := fb_FileOpen.hFile;
+	fb_FileOpen.bExecute := FALSE;
+	CaseWriting        := 300;
+END_IF
+
+300: //Extrapolating current time
+//Hours + conversion in double figure
+IF i_TimeStruct.wHour < 10 THEN
+	TimeArray[1] := CONCAT('0',WORD_TO_STRING(i_TimeStruct.wHour));
+	ELSE
+	TimeArray[1] := WORD_TO_STRING(i_TimeStruct.wHour);
+END_IF
+//Minutes + conversion in double figure
+IF i_TimeStruct.wMinute < 10 THEN
+	TimeArray[2] := CONCAT('0',WORD_TO_STRING(i_TimeStruct.wMinute));
+	ELSE
+	TimeArray[2] := WORD_TO_STRING(i_TimeStruct.wMinute);
+END_IF
+//Seconds + conversion in double figure
+IF i_TimeStruct.wSecond < 10 THEN
+	TimeArray[3] := CONCAT('0',WORD_TO_STRING(i_TimeStruct.wSecond));
+	ELSE
+	TimeArray[3] := WORD_TO_STRING(i_TimeStruct.wSecond);
+END_IF
+IF TimeArray[1] <> '' AND TimeArray[2] <> '' AND TimeArray[3] <> '' THEN
+	CaseWriting := 400;
+END_IF
+
+400: //Generating full time array for multiconcat
+MultiConcatString[1] := TimeArray[1];
+MultiConcatString[2] := ':';
+MultiConcatString[3] := TimeArray[2];
+MultiConcatString[4] := ':';
+MultiConcatString[5] := TimeArray[3];
+MultiConcatString[6] := ';';
+//Execution of multiconcat
+fb_MultiConcat.i_StringsArray  := MultiConcatString;
+fb_MultiConcat.i_StringsNumber := 6;
+fb_MultiConcat.i_Enable        := TRUE;
+//Wait for multiconcat done
+IF fb_MultiConcat.o_String <> '' THEN
+	HeadingString        := fb_MultiConcat.o_String;
+	fb_MultiConcat.i_Enable := FALSE;
+	CaseWriting              := 500;
+END_IF
+
+500: //Making full data string
+fb_MultiConcat.i_StringsArray  := ElaboratedArray;
+fb_MultiConcat.i_StringsNumber := i_StringsNumber*2;
+fb_MultiConcat.i_Enable        := TRUE;
+//Wait for multiconcat done
+IF fb_MultiConcat.o_String <> '' THEN
+	DateTimeString                := fb_MultiConcat.o_String;
+	fb_MultiConcat.i_Enable := FALSE;
+	CaseWriting              := 600;
+END_IF
+
+600: //Making Date,Time,Data String
+MultiConcatString[1] := HeadingString;
+MultiConcatString[2] := DateTimeString;
+MultiConcatString[3] := '$L';
+//Execution of multiconcat
+fb_MultiConcat.i_StringsArray  := MultiConcatString;
+fb_MultiConcat.i_StringsNumber := 3;
+fb_MultiConcat.i_Enable        := TRUE;
+//Wait for multiconcat done
+IF fb_MultiConcat.o_String <> '' THEN
+	FullString            := fb_MultiConcat.o_String;
+	fb_MultiConcat.i_Enable := FALSE;
+	CaseWriting              := 700;
+END_IF
+
+700: //Write of the string on file
+fb_FileWrite.hFile      := HeaderFile;
+fb_FileWrite.pWriteBuff := ADR(FullString);
+fb_FileWrite.cbWriteLen := LEN(FullString);
+fb_FileWrite.tTimeout := T#5S;
+fb_FileWrite.bExecute := TRUE;
+IF fb_FileWrite.bBusy = TRUE THEN
+	CaseWriting := 800;
+END_IF
+
+800: //Check for errors
+IF fb_FileWrite.bBusy = FALSE AND fb_FileWrite.bError = FALSE THEN
+	fb_FileWrite.bExecute := FALSE;
+	CaseWriting       := 900;
+END_IF
+
+900: //File close
+fb_FileClose.hFile    := HeaderFile;
+fb_FileClose.tTimeout := T#5S;
+fb_FileClose.bExecute := TRUE;
+IF fb_FileClose.bBusy = TRUE THEN
+	CaseWriting := 1200;
+END_IF
+
+1200: //Check for errors
+IF fb_FileClose.bBusy = FALSE AND fb_FileClose.bError = FALSE THEN
+	fb_FileClose.bExecute := FALSE;
+	CaseWriting       := 1300;
+END_IF
+
+1300: //Wait for next write
+IF fb_AltOutputs.o_Output1 = FALSE THEN
+	CaseWriting := 0;
+END_IF
+END_CASE

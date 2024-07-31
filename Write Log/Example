@@ -1,0 +1,59 @@
+//Generating the data array -Example 1
+DataArray[1] := CONCAT('Sensor 1 value: ',REAL_TO_STRING(Value1));
+DataArray[2] := CONCAT('Sensor 2 value: ',REAL_TO_STRING(Value2));
+DataArray[3] := CONCAT('Sensor 3 value: ',REAL_TO_STRING(Value3));
+DataArray[4] := CONCAT('Sensor 4 value: ',REAL_TO_STRING(Value4));
+DataArray[5] := CONCAT('Sensor 5 value: ',REAL_TO_STRING(Value5));
+
+//Generating the data array -Example 2
+IF Condition1 = TRUE THEN
+	DataArray[1] := 'Condition 1 TRUE';
+	ELSE
+		DataArray[1] := 'Condition 1 FALSE';
+END_IF
+
+IF Condition2 = TRUE THEN
+	DataArray[2] := 'Condition 2 TRUE';
+	ELSE
+		DataArray[2] := 'Condition 2 FALSE';
+END_IF
+
+IF Condition3 = TRUE THEN
+	DataArray[3] := 'Condition 3 TRUE';
+	ELSE
+		DataArray[3] := 'Condition 3 FALSE';
+END_IF
+
+IF Condition1 = TRUE THEN
+	DataArray[4] := 'Condition 4 TRUE';
+	ELSE
+		DataArray[4] := 'Condition 4 FALSE';
+END_IF
+
+IF Condition5 = TRUE THEN
+	DataArray[5] := 'Condition 5 TRUE';
+	ELSE
+		DataArray[5] := 'Condition 5 FALSE';
+END_IF
+
+//Call of local system time obtain function block
+fb_LocalSystemTime(
+	sNetID   := '', 
+	bEnable  := TRUE, 
+	dwCycle  := , 
+	dwOpt    := , 
+	tTimeout := , 
+	bValid     => , 
+	systemTime => , 
+	tzID       => );
+
+//Call of LOG write function block
+fb_WriteLog(
+	i_Enable        := TRUE, 
+	i_Interval      := T#1M, 
+	i_Directory     := 'C:/Logs/PLC_Logs/',            //File path with the "/" closing character
+	i_FileName      := 'Log',                          //Filename without extensions. The function block will add _20240731 (date formatted like this) at the end
+	i_FileExtension := 'csv',                          //File extension without the "."
+	i_StringsNumber := 5,                              //How many string you need to log
+	i_StringsArray  := DataArray,
+	i_TimeStruct    := fb_LocalSystemTime.systemTime); //Timestruct from the beckhoff function

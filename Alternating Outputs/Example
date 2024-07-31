@@ -1,0 +1,29 @@
+//Output 1@TRUE for 1s, @FALSE for 2s
+//Output 2@TRUE for 2s, @FALSE for 1s
+//Usage example: apply pressure for 1s, rest for 2s
+fb_AltOutputs1(
+	i_Enable := TRUE, 
+	i_Time1  := T#1S, 
+	i_Time2  := T#2S, 
+	o_Output1 => (*CMD PRESSURE*), 
+	o_Output2 => (*RELEASE PRESSURE*));
+	
+//Output 1@TRUE for 1s, @FALSE for 1s
+//Output 2@TRUE for 1s, @FALSE for 1s
+//Usage example: green and red lamps alternating
+fb_AltOutputs2(
+	i_Enable := TRUE, 
+	i_Time1  := T#1S, 
+	i_Time2  := T#1S, 
+	o_Output1 => (*GREEN LAMP*), 
+	o_Output2 => (*RED LAMP*));
+	
+//Output 1@TRUE for 0.5s, @FALSE for 0.5s
+//Output 2@TRUE for 0.5s, @FALSE for 0.5s
+//Usage example: white led flashing
+fb_AltOutputs3(
+	i_Enable := TRUE, 
+	i_Time1  := T#0.5S, 
+	i_Time2  := T#0.5S, 
+	o_Output1 => (*WHITE LED*), 
+	o_Output2 => );

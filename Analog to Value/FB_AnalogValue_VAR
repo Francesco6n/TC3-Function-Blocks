@@ -1,0 +1,22 @@
+FUNCTION_BLOCK FB_AnalogValue
+
+VAR_INPUT
+	//Data
+	i_ActualRAW : INT;
+	
+	//Parameters
+	i_MinimumValue : INT;
+	i_MaximumValue : INT;
+	i_MinimumRAW   : INT;
+	i_MaximumRAW   : INT;
+END_VAR
+
+VAR_OUTPUT
+	//Outputs
+	o_Value : REAL;
+END_VAR
+
+VAR
+	//Temporary
+	Scale : REAL;
+END_VAR

@@ -1,0 +1,17 @@
+//Example 1: 0-20mA or 0-10V on a 0mm - 2000mm ultrasonic sensor
+fb_AnalogValue(
+	i_ActualRAW    := (*ANALOG INPUT*), 
+	i_MinimumValue := 0,     //Minimum sensor scale
+	i_MaximumValue := 0,     //Maximum sensor scale
+	i_MinimumRAW   := 0,     //Minimum analog value
+	i_MaximumRAW   := 32767, //Maximum analog value
+	o_Value => );            //Computed proportion value
+	
+//Example 1: 4-20mA on a -50° +150° temperature sensor
+fb_AnalogValue(
+	i_ActualRAW    := (*ANALOG INPUT*), 
+	i_MinimumValue := -50,   //Minimum sensor scale
+	i_MaximumValue := 150,   //Maximum sensor scale
+	i_MinimumRAW   := 6553,  //Minimum analog value
+	i_MaximumRAW   := 32767, //Maximum analog value
+	o_Value => );            //Computed proportion value

@@ -1,0 +1,29 @@
+FUNCTION_BLOCK FB_MQTT
+
+VAR_INPUT
+	//Parameters
+	i_ClientID      : STRING(255);
+	i_HostName      : STRING(255);
+	i_HostPort      : UINT;
+	i_Interval      : TIME;
+	i_Prefix        : STRING(255);
+	i_StringsNumber : INT;
+	i_StringsArray  : ARRAY[1..64] OF STRING(255);
+END_VAR
+
+VAR_OUTPUT
+END_VAR
+
+VAR
+	//Function Blocks
+	fb_IotMqttClient : FB_IotMqttClient;
+	fb_AltOutputs    : FB_AltOutputs;
+	
+	//Cases
+	CasePublication : INT;
+	
+	//Temporary
+	WritingIndex    : INT;
+	StringToPublish : STRING(255);
+	Topic           : STRING(255);
+END_VAR

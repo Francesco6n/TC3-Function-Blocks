@@ -1,0 +1,34 @@
+//Enable check
+IF i_Enable = TRUE AND CaseFlipFlop = 0 THEN
+	CaseFlipFlop := 100;
+END_IF
+
+//Procedure reset
+IF i_Enable = FALSE OR i_Reset = TRUE THEN
+	CaseFlipFlop := 0;
+	o_Output  := FALSE;
+END_IF
+
+//Case start
+CASE CaseFlipFlop OF
+100: //Wait for signal @TRUE
+IF i_Signal = TRUE THEN
+	CaseFlipFlop := 200;
+END_IF
+
+200: //Wait for signal @FALSE
+IF i_Signal = FALSE THEN
+	CaseFlipFlop := 300;
+END_IF
+
+300: //Output flip-flop
+IF o_Output = TRUE THEN
+	o_Output := FALSE;
+	ELSE
+	o_Output := TRUE;
+END_IF
+CaseFlipFlop := 400;
+
+400: //Procedure end
+CaseFlipFlop := 0;
+END_CASE

@@ -1,0 +1,84 @@
+//Function block for managing interval
+fb_AltOutputs(
+	i_Enable := i_Enable, 
+	i_Time1  := Clock, 
+	i_Time2  := Clock, 
+	o_Output1 => , 
+	o_Output2 => );
+	
+//Timers declaration
+CycleTimer (IN:= CaseArray <> 0, PT:= T#20S);
+
+//Reset request
+IF i_Reset = TRUE THEN
+	Reset := TRUE;
+END_IF
+
+//Case start
+CASE CaseArray OF
+0: //Initial settings
+IndexArrayWrite := 1;
+ArrayCount1     := 0;
+ArrayCount2     := 0;
+IF fb_AltOutputs.o_Output1 = TRUE THEN
+	CaseArray := 100;
+END_IF
+
+100: //Copy of the input arrays in the temp array skipping empty records
+FOR IndexArrayGlobalCheck := 1 TO 20 DO
+	FOR IndexArraySingleCheck := 1 TO 10 DO
+		IF i_Array[IndexArrayGlobalCheck][IndexArraySingleCheck] <> '' THEN
+			TempArray[IndexArrayWrite] := i_Array[IndexArrayGlobalCheck][IndexArraySingleCheck];
+			IndexArrayWrite := IndexArrayWrite + 1;
+		END_IF
+	END_FOR
+END_FOR
+IF IndexArrayGlobalCheck > 20 THEN
+	CaseArray := 200;
+END_IF
+
+200: //Counting records in the temp array
+FOR IndexArrayCount1 := 1 TO 200 DO
+	IF TempArray[IndexArrayCount1] <> '' THEN
+		ArrayCount1 := ArrayCount1 + 1;
+	END_IF
+END_FOR
+//Counting records in the output array
+FOR IndexArrayCount2 := 1 TO 200 DO
+	IF o_Array[IndexArrayCount2] <> '' THEN
+		ArrayCount2 := ArrayCount2 + 1;
+	END_IF
+END_FOR
+//If the temp array has more records, copy the temp array in the output array
+IF IndexArrayCount1 > 200 AND IndexArrayCount2 > 200 THEN
+	IF ArrayCount1 > ArrayCount2 THEN
+		o_Array := TempArray;
+		CaseArray := 300;
+		ELSE
+		CaseArray := 300;
+		END_IF
+END_IF
+
+300: //Temp array cleaning
+FOR IndexArrayCount1 := 1 TO 200 DO
+	TempArray[IndexArrayCount1] := '';
+END_FOR
+//Cleaning of the output array if there is a reset request
+IF Reset = TRUE THEN
+	FOR IndexArrayCount2 := 1 TO 200 DO
+		o_Array[IndexArrayCount2] := '';
+	END_FOR
+END_IF
+//Removing the reset request and copying the cycle time
+IF (IndexArrayCount1 > 200 AND Reset = FALSE) 
+    OR (IndexArrayCount1 > 200 AND Reset = TRUE AND IndexArrayCount2 > 200) THEN
+	Reset := FALSE;
+	Clock := CycleTimer.ET + T#100MS;
+	CaseArray := 400;
+END_IF
+
+400: //Wait for interval gone
+IF fb_AltOutputs.o_Output1 = FALSE THEN
+	CaseArray := 0;
+END_IF
+END_CASE

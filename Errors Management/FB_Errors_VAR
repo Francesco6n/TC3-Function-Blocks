@@ -1,0 +1,38 @@
+FUNCTION_BLOCK FB_Errors
+
+VAR_INPUT
+	//Commands
+	i_Enable : BOOL;
+	i_Reset  : BOOL;
+	
+	//Data
+	i_Array : ARRAY[1..20] OF ARRAY[1..10] OF STRING(255);
+END_VAR
+
+VAR_OUTPUT
+	//Data
+	o_Array : ARRAY[1..200] OF STRING(255);
+END_VAR
+
+VAR
+	//Cases
+	CaseArray : INT;
+	
+	//Temporary
+	Reset                 : BOOL;
+	IndexArrayGlobalCheck : INT;
+	IndexArraySingleCheck : INT;
+	IndexArrayWrite       : INT;
+	ArrayCount1           : INT;
+	ArrayCount2           : INT;
+	IndexArrayCount1      : INT;
+	IndexArrayCount2      : INT;
+	TempArray             : ARRAY[1..200] OF STRING(255);
+	
+	//Parameters
+	Clock : TIME := T#5S;
+	
+	//Function blocks
+	fb_AltOutputs : FB_AltOutputs;
+	CycleTimer    : TON;
+	END_VAR

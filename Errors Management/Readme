@@ -1,0 +1,15 @@
+This function block is used to reorder 20 arrays, each containing 10 string records, into a sorted array. It can be used, for example, to generate an error list for the HMI.
+
+Input example     Output example
+1) q              1) q
+2) w              2) w
+3)                3) e
+4) e              4) r
+5) r              5) t
+6)                6) y
+7) t              7)
+8)                8)
+9)                9)
+10) y             10)
+
+If the input array records change, only the new ones will be added to the output array. When the reset button is pressed, the output array is emptied, clearing any history of the input array.

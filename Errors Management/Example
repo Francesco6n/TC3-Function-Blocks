@@ -1,0 +1,38 @@
+//Generation of the input array -Example 1
+//Manual assignation of the errors. Index 1 is the number of the machine, Index 2 is the diciture of the error.
+Errors_Array[1][1] := 'Machine 1 Error 1';
+Errors_Array[1][2] := '';
+Errors_Array[1][3] := 'Machine 1 Error 3';
+
+//Generation of the input array -Example 2
+//Assignation of errors with conditions. Index 1 is the number of the machine, Index 2 is the diciture of the error.
+IF Condition1 = TRUE THEN
+	Errors_Array[1][1] := 'Machine 1 Error 1';
+	ELSE
+		Errors_Array[1][1] := '';
+END_IF
+
+IF Condition2 = FALSE THEN
+	Errors_Array[1][2] := 'Machine 1 Error 2';
+	ELSE
+		Errors_Array[1][2] := '';
+END_IF
+
+IF Condition3 = TRUE THEN
+	Errors_Array[1][3] := 'Machine 1 Error 3';
+	ELSE
+		Errors_Array[1][3] := '';
+END_IF
+
+//Generation of the input array -Example 3
+//External assignation of errors. Each machine produce an array of 10 records.
+Errors_Array[1] := Errors1;
+Errors_Array[2] := Errors2;
+Errors_Array[3] := Errors3;
+
+//Call of errors management function block
+fb_Errors(
+	i_Enable := TRUE, 
+	i_Reset  := (*RESET BUTTON*), 
+	i_Array  := Errors_Array, 
+	o_Array => (*OUTPUT ARRAY*));

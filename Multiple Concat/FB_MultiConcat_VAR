@@ -1,0 +1,25 @@
+FUNCTION_BLOCK FB_MultiConcat
+
+VAR_INPUT
+	//Commands
+	i_Enable        : BOOL;
+	i_Continue      : BOOL;
+	
+	//Data
+	i_StringsNumber : INT;
+	i_StringsArray  : ARRAY[1..128] OF STRING(255);
+END_VAR
+
+VAR_OUTPUT
+	//Output
+	o_String : STRING(255);
+END_VAR
+
+VAR
+	//Cases
+	CaseConcat  : INT;
+	
+	//Temporary
+	IndexConcat : INT;
+	TempString  : STRING(255);
+END_VAR

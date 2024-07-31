@@ -1,0 +1,36 @@
+//Generating strings array
+StringsArray[1] := 'This ';
+StringsArray[2] := 'is ';
+StringsArray[3] := 'an ';
+StringsArray[4] := 'example ';
+StringsArray[5] := 'of ';
+StringsArray[6] := 'usage ';
+StringsArray[7] := 'of ';
+StringsArray[8] := 'this ';
+StringsArray[9] := 'function ';
+StringsArray[10] := 'block.';
+
+//Example 1: Manual enable. The function block will generate the output string. For generating another string, remove and re-apply the enable.
+//ENABLE @TRUE
+//COPY OF THE STING IN ANOTHER VARIABLE
+//ENABLE @FALSE
+//CHANGE OF THE INPUT STRING
+//ENABLE @TRUE
+//And so on..
+//With this method, you can use only 1 multiconcat function block
+fb_MultiConcat(
+	i_Enable        := (*ENABLE*), 
+	i_Continue      := , 
+	i_StringsNumber := 10, 
+	i_StringsArray  := StringsArray, 
+	o_String => ConcatenatedString);
+	
+//Example 2: Automatic enable. The function block will generate the output string continuously.
+//The output sring will change in real-time.
+//With this method, yoy can use multiple function block and read the strings directly from the function block Ex: PRG_Example.fb_MultiConcat.o_String
+fb_MultiConcat(
+	i_Enable        := TRUE, 
+	i_Continue      := TRUE, 
+	i_StringsNumber := 10, 
+	i_StringsArray  := StringsArray, 
+	o_String => ConcatenatedString);

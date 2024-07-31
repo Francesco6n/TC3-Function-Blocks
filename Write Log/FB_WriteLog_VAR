@@ -1,0 +1,42 @@
+FUNCTION_BLOCK FB_WriteLog
+
+VAR_INPUT
+	//Commands
+	i_Enable : BOOL;
+	
+	//Parameters
+	i_Interval      : TIME;
+	i_Directory     : STRING(255);
+	i_FileName      : STRING(255);
+	i_FileExtension : STRING(255);
+	i_StringsNumber : INT;
+	i_StringsArray  : ARRAY [1..64] OF STRING(255);
+	i_TimeStruct    : Timestruct;
+END_VAR
+
+VAR_OUTPUT
+END_VAR
+
+VAR	
+	//Function Blocks
+	fb_FileOpen    : FB_FileOpen;
+	fb_MultiConcat : FB_MultiConcat;
+	fb_FileWrite   : FB_FileWrite;
+	fb_FileClose   : FB_FileClose;
+	fb_AltOutputs  : FB_AltOutputs;
+	
+	//Temporary
+	ElaboratedArray     : ARRAY[1..128] OF STRING(255);
+	ElaborationIndex    : INT;
+	ElaboratedDirectory : STRING(255);
+	HeadingString       : STRING(255);
+	DateTimeString      : STRING(255);
+	FullString          : STRING(255);
+	MultiConcatString   : ARRAY[1..128] OF STRING(255);
+	TimeArray           : ARRAY[1..3] OF STRING(255);
+	DateArray           : ARRAY[1..3] OF STRING(255);
+	HeaderFile          : UINT;
+	
+	//Cases
+	CaseWriting : INT;
+END_VAR

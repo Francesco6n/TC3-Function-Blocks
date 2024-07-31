@@ -1,0 +1,1 @@
+This function block is used to write a list of input strings to a log file. You can set the interval, format, and file path. The generated file will have today's date added in this format: '_20240731'. The function block will also add the time of the record entry.

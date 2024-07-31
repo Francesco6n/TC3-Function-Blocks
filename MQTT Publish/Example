@@ -1,0 +1,47 @@
+//Generating the data array -Example 1
+DataArray[1] := CONCAT('Sensor 1 value: ',REAL_TO_STRING(Value1));
+DataArray[2] := CONCAT('Sensor 2 value: ',REAL_TO_STRING(Value2));
+DataArray[3] := CONCAT('Sensor 3 value: ',REAL_TO_STRING(Value3));
+DataArray[4] := CONCAT('Sensor 4 value: ',REAL_TO_STRING(Value4));
+DataArray[5] := CONCAT('Sensor 5 value: ',REAL_TO_STRING(Value5));
+
+//Generating the data array -Example 2
+IF Condition1 = TRUE THEN
+	DataArray[1] := 'Condition 1 TRUE';
+	ELSE
+		DataArray[1] := 'Condition 1 FALSE';
+END_IF
+
+IF Condition2 = TRUE THEN
+	DataArray[2] := 'Condition 2 TRUE';
+	ELSE
+		DataArray[2] := 'Condition 2 FALSE';
+END_IF
+
+IF Condition3 = TRUE THEN
+	DataArray[3] := 'Condition 3 TRUE';
+	ELSE
+		DataArray[3] := 'Condition 3 FALSE';
+END_IF
+
+IF Condition1 = TRUE THEN
+	DataArray[4] := 'Condition 4 TRUE';
+	ELSE
+		DataArray[4] := 'Condition 4 FALSE';
+END_IF
+
+IF Condition5 = TRUE THEN
+	DataArray[5] := 'Condition 5 TRUE';
+	ELSE
+		DataArray[5] := 'Condition 5 FALSE';
+END_IF
+
+//Call of MQTT transmission function block
+fb_MQTT(
+	i_ClientID      := 'PLC',           //Name to show
+	i_HostName      := '192.168.1.100', //IP Address of the PLC
+	i_HostPort      := 1883,            //Port to use (1883 is the default)
+	i_Interval      := T#1M,            //Writing interval
+	i_Prefix        := 'Beckhoff_',     //Prefix, Ex: "Beckhoff_Condition 1 TRUE"
+	i_StringsNumber := 10,              //How many string to write
+	i_StringsArray  := DataArray);      //Data array input

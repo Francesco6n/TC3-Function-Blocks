@@ -1,0 +1,29 @@
+//Enable check
+IF i_Enable = TRUE AND CaseConcat = 0 THEN
+	CaseConcat := 100;
+END_IF
+
+//Procedure reset
+IF i_Enable = FALSE THEN
+	CaseConcat := 0;
+	o_String := '';
+END_IF
+
+//Case start
+CASE CaseConcat OF
+100: //Copy of the 1st record
+TempString := i_StringsArray[1];
+CaseConcat := 200;
+
+200: //Concat cycle (2+)
+FOR IndexConcat := 2 TO i_StringsNumber DO
+	TempString := CONCAT(TempString,i_StringsArray[IndexConcat]);
+END_FOR
+CaseConcat := 300;
+
+300: //Full string release
+o_String := TempString;
+IF i_Continue = TRUE THEN
+	CaseConcat := 100;
+END_IF
+END_CASE

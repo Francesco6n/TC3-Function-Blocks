@@ -1,0 +1,25 @@
+FUNCTION_BLOCK FB_AltOutputs
+
+VAR_INPUT
+	//Commands
+	i_Enable : BOOL;
+	
+	//Parameters
+	i_Time1 : TIME;
+	i_Time2 : TIME;
+END_VAR
+
+VAR_OUTPUT
+	//Commands
+	o_Output1 : BOOL;
+	o_Output2 : BOOL;
+END_VAR
+
+VAR
+	//Cases
+	CaseAlternation : INT;
+	
+	//Timers
+	Timer1 : TON;
+	Timer2 : TON;
+END_VAR

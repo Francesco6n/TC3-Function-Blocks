@@ -1,0 +1,49 @@
+FUNCTION_BLOCK FB_PropValve
+
+VAR_INPUT
+	//Status
+	i_Name      : STRING(255);
+	i_Emergency : BOOL;
+	i_Enable    : BOOL;
+	
+	//Parameters
+	i_ActualTemperature  : REAL;
+	i_TemperatureSetPoint: REAL;
+	i_ActualPositioning  : INT;
+	i_MinimumRAW_In      : INT;
+	i_MaximumRaw_In      : INT;
+	i_MinimumRAW_Out     : INT;
+	i_MaximumRAW_Out     : INT;
+	i_PositionTollerance : REAL;
+	i_PositioningTimeout : TIME;
+	
+	//PID
+	i_CycleTime : REAL;
+	i_KP        : REAL;
+	i_TN        : REAL;
+	i_TV        : REAL;
+END_VAR
+
+VAR_OUTPUT
+	//Outputs
+	o_SetPoint           : INT;
+	o_ActualPositionPerc : REAL;
+	
+	//Errors
+	o_Errors : ARRAY[1..10] OF STRING(255);
+	o_Error  : BOOL;
+END_VAR
+
+VAR
+	//Timers
+	PositioningTimeout : TON;
+	
+	//Temporary
+	TempDifference     : REAL;
+	PositionDifference : REAL;
+	
+	//Function blocks
+	fb_PID_Valve     : PID_FIXCYCLE;
+	fb_PercentageOUT : FB_ValueToPercentage;
+	fb_PercentageIN  : FB_ValueToPercentage;
+END_VAR

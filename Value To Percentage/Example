@@ -1,0 +1,23 @@
+//Call off percentage function block -Example 1
+//0-20mA or 0-10V
+fb_ValueToPercentage(
+	i_ActualValue := (*ANALOG INPUT*),
+	i_MinValue    := 0, 
+	i_MaxValue    := 32767, 
+	o_Percentage => );
+	
+//Call off percentage function block -Example 2
+//4-20mA
+fb_ValueToPercentage(
+	i_ActualValue := (*ANALOG INPUT*),
+	i_MinValue    := 6553, 
+	i_MaxValue    := 32767, 
+	o_Percentage => );
+	
+//Call off percentage function block -Example 3
+//0-5V
+fb_ValueToPercentage(
+	i_ActualValue := (*ANALOG INPUT*),
+	i_MinValue    := 0, 
+	i_MaxValue    := 16383, 
+	o_Percentage => );

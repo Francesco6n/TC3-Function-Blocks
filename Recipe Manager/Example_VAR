@@ -1,0 +1,31 @@
+PROGRAM MAIN
+
+VAR
+	//Commands
+	LoadList     : BOOL;
+	LoadRecipe   : BOOL;
+	SaveRecipe   : BOOL;
+	DeleteRecipe : BOOL;
+	
+	//Cases
+	CaseList   : INT;
+	CaseLoad   : INT;
+	CaseSave   : INT;
+	CaseDelete : INT;
+	
+	//Temporary
+	IndexLoad   : INT;
+	IndexModify : INT;
+	
+	RecipeName : STRING(255);
+	
+	ListArray  : ARRAY[0..99] OF STRING(255);
+	DataArray  : ARRAY[1..100] OF STRING(255);
+	DataArray2 : ARRAY[1..100] OF ARRAY[1..2] OF STRING(255);
+	
+	//Function blocks
+	fb_ListCSV    : FB_ListCSV;
+	fb_CSVToArray : FB_CSVToArray;
+	fb_ArrayToCSV : FB_ArrayToCSV;
+	fb_DeleteCSV  : FB_DeleteCSV;
+END_VAR

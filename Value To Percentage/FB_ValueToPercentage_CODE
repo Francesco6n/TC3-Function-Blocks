@@ -1,0 +1,12 @@
+//Avoiding ZERO divide
+IF (i_MaxValue - i_MinValue) <> 0 THEN
+	//Computing percentage
+    TempPercentage := (i_ActualValue / (i_MaxValue - i_MinValue)) * 100;
+	IF TempPercentage < 0 THEN
+		//Negative percentage
+		o_Percentage := TempPercentage * -1;
+		ELSE
+			//Positive percentage
+			o_Percentage := TempPercentage;
+	END_IF
+END_IF

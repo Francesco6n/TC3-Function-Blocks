@@ -1,0 +1,35 @@
+FUNCTION_BLOCK FB_ArrayToCSV
+
+VAR_INPUT
+	//Commands
+	i_Enable : BOOL;
+	
+	//Parameters
+	i_Directory    : STRING(255);
+	i_FileName     : STRING(255);
+	i_StringsArray : ARRAY [1..100] OF ARRAY[1..2] OF STRING(255);
+END_VAR
+
+VAR_OUTPUT
+	//Outputs
+	o_Done : BOOL;
+END_VAR
+
+VAR	
+	//Function Blocks
+	fb_FileOpen    : FB_FileOpen;
+	fb_FileWrite   : FB_FileWrite;
+	fb_FileClose   : FB_FileClose;
+	fb_MultiConcat : FB_MultiConcat;
+	
+	//Temporary
+	ElaboratedDirectory : STRING(255);
+	FullString          : STRING(255);
+	MultiConcatArray    : ARRAY[1..128] OF STRING(255);
+	HeaderFile          : UINT;
+	ElaboratingIndex    : INT;
+	WriteStarted        : BOOL;
+	
+	//Cases
+	CaseWrite : INT;
+END_VAR

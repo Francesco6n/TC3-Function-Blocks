@@ -1,0 +1,17 @@
+//Generating recipe array
+RecipeArray[1][1] := 'Parameter 1';
+RecipeArray[1][2] := REAL_TO_STRING(Parameter);
+
+RecipeArray[2][1] := 'Parameter 2';
+RecipeArray[2][2] := REAL_TO_STRING(Parameter);
+
+RecipeArray[3][1] := 'Parameter 3';
+RecipeArray[3][2] := REAL_TO_STRING(Parameter);
+
+//Recipe save function block
+fb_ArrayToCSV(
+	i_Enable       := (*BUTTON OR SIGNAL*), 
+	i_Directory    := 'C:/Recipes/', 
+	i_FileName     := 'Recipe1', 
+	i_StringsArray := RecipeArray, 
+	o_Done => );

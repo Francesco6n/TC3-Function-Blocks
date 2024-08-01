@@ -1,0 +1,28 @@
+FUNCTION_BLOCK FB_DeleteCSV
+
+VAR_INPUT
+	//Commands
+	i_Enable : BOOL;
+	
+	//Parameters
+	i_Directory : STRING(255);
+	i_FileName  : STRING(255);
+END_VAR
+
+VAR_OUTPUT
+	//Output
+	o_End : BOOL;
+END_VAR
+
+VAR
+	//Function Blocks
+	fb_MultiConcat : FB_MultiConcat;
+	fb_FileDelete  : FB_FileDelete;
+	
+	//Cases
+	CaseDelete : INT;
+	
+	//Temporary
+	MultiConcatArray    : ARRAY[1..128] OF STRING(255);
+	ElaboratedDirectory : STRING(255);
+END_VAR

@@ -1,0 +1,19 @@
+//Call of csv to array function block
+fb_CSVToArray(
+	i_Enable    := (*BUTTON OR SIGNAL*), 
+	i_Directory := 'C:/Recipes/', 
+	i_FileName  := 'Recipe', 
+	o_Array => TempArray, 
+	o_Done  => );
+	
+//Data copy from array -Example 1
+ValueArray[1] := STRING_TO_REAL(TempArray[1]);
+ValueArray[2] := STRING_TO_REAL(TempArray[2]);
+ValueArray[3] := STRING_TO_REAL(TempArray[3]);
+ValueArray[4] := STRING_TO_REAL(TempArray[4]);
+ValueArray[5] := STRING_TO_REAL(TempArray[5]);
+
+//Data copy from array -Example 2
+FOR IndexArray := 1 TO 5 DO
+	ValueArray[IndexArray] := STRING_TO_REAL(TempArray[IndexArray]);
+END_FOR

@@ -1,0 +1,6 @@
+//Call of recipe delete function block
+fb_DeleteCSV(
+	i_Enable    := (*BUTTON OR SIGNAL*), 
+	i_Directory := 'C:/Recipes/', 
+	i_FileName  := 'Recipe', 
+	o_End => );

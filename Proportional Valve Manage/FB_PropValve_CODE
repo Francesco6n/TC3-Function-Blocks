@@ -1,0 +1,85 @@
+//Timers declaration
+PositioningTimeout (PT:= i_PositioningTimeout);
+
+//Call of function block for calculating the desidered position
+fb_PercentageOUT(
+	i_ActualValue := fb_PID_Valve.Y, 
+	i_MinValue  := i_MinimumRAW_Out, 
+	i_MaxValue := i_MaximumRAW_Out, 
+	o_Percentage => );
+	
+//Call of function block for calculating the actual position
+fb_PercentageIN(
+	i_ActualValue := i_ActualPositioning, 
+	i_MinValue  := i_MinimumRAW_In, 
+	i_MaxValue := i_MaximumRaw_In, 
+	o_Percentage => o_ActualPositionPerc);
+
+//Call of PID regulation function block
+fb_PID_Valve(
+	ACTUAL    := i_ActualTemperature, 
+	SET_POINT := i_TemperatureSetPoint, 
+	KP        := i_KP, 
+	TN        := i_TN, 
+	TV        := i_TV, 
+	Y_MANUAL  := i_MinimumRAW_Out, 
+	Y_OFFSET  := , 
+	Y_MIN     := i_MinimumRAW_Out, 
+	Y_MAX     := i_MaximumRAW_Out, 
+	MANUAL    := i_Emergency = FALSE OR i_Enable = FALSE, 
+	RESET     := , 
+	CYCLE     := i_CycleTime, 
+	Y             => , 
+	LIMITS_ACTIVE => , 
+	OVERFLOW      => );
+	
+//Conversion of the pid value into an INT value
+o_SetPoint := REAL_TO_INT(fb_PID_Valve.Y);
+
+//Check for position coherence
+TempDifference := fb_PercentageOUT.o_Percentage - fb_PercentageIN.o_Percentage;
+IF TempDifference < 0 THEN
+	PositionDifference := TempDifference * -1;
+	ELSE
+		PositionDifference := TempDifference;
+END_IF
+
+//If position feedback is out of tollerance, the timer will start
+IF PositionDifference > i_PositionTollerance THEN
+	PositioningTimeout.IN := TRUE;
+	ELSE
+		PositioningTimeout.IN := FALSE;
+END_IF
+
+//Errors management
+IF PositioningTimeout.Q = TRUE THEN
+	o_Errors[1] := CONCAT(CONCAT(i_Name,' : '),'TIMEOUT POSITIONING VALVE');
+	ELSE
+		o_Errors[1] := '';
+END_IF
+
+o_Errors[2] := '';
+o_Errors[3] := '';
+o_Errors[4] := '';
+o_Errors[5] := '';
+o_Errors[6] := '';
+o_Errors[7] := '';
+o_Errors[8] := '';
+o_Errors[9] := '';
+o_Errors[10] := '';
+
+//Release of error bit
+IF o_Errors[1] <> '' 
+OR o_Errors[2] <> '' 
+OR o_Errors[3] <> '' 
+OR o_Errors[4] <> '' 
+OR o_Errors[5] <> '' 
+OR o_Errors[6] <> '' 
+OR o_Errors[7] <> '' 
+OR o_Errors[8] <> '' 
+OR o_Errors[9] <> '' 
+OR o_Errors[10] <> '' THEN
+	o_Error := TRUE;
+	ELSE
+		o_Error := FALSE; 
+END_IF

@@ -1,0 +1,122 @@
+//Function blocks enable
+fb_FileOpen    ();
+fb_MultiConcat ();
+fb_FileWrite   ();
+fb_FileClose   ();
+
+//Procedure reset
+IF i_Enable = FALSE THEN
+	fb_FileOpen.bExecute    := FALSE;
+	fb_FileWrite.bExecute   := FALSE;
+	fb_FileClose.bExecute   := FALSE;
+	fb_MultiConcat.i_Enable := FALSE;
+	o_Done                  := FALSE;
+	CaseWrite               := 0;
+END_IF
+
+//Enable check
+IF i_Enable = TRUE AND CaseWrite = 0 THEN
+	CaseWrite := 1;
+END_IF
+
+//Case start
+CASE CaseWrite OF
+1://Generating full directory
+MultiConcatArray[1] := i_Directory;
+MultiConcatArray[2] := i_FileName;
+MultiConcatArray[3] := '.';
+MultiConcatArray[4] := 'CSV';
+
+//Writing full directory to multiconcat
+fb_MultiConcat.i_StringsArray  := MultiConcatArray;
+fb_MultiConcat.i_StringsNumber := 4;
+fb_MultiConcat.i_Enable        := TRUE;
+
+//Check for multiconcat done
+IF fb_MultiConcat.o_String <> '' THEN
+	ElaboratedDirectory     := fb_MultiConcat.o_String;
+	fb_MultiConcat.i_Enable := FALSE;
+	CaseWrite               := 2;
+END_IF
+
+2: //File creation
+fb_FileOpen.sPathName := ElaboratedDirectory;
+fb_FileOpen.nMode     := FOPEN_MODEWRITE;
+fb_FileOpen.ePath     := PATH_GENERIC;
+fb_FileOpen.tTimeout  := T#5S;
+fb_FileOpen.bExecute  := TRUE;
+IF fb_FileOpen.bBusy = TRUE THEN
+	CaseWrite := 3;
+END_IF
+
+3: //Check for errors
+IF fb_FileOpen.bBusy = FALSE AND fb_FileOpen.bError = FALSE AND fb_FileOpen.hFile <> 0 THEN
+	HeaderFile           := fb_FileOpen.hFile;
+	fb_FileOpen.bExecute := FALSE;
+	ElaboratingIndex    := 1;
+	CaseWrite        := 4;
+END_IF
+
+4: (*FILE ASSEMBLY*)
+//Generating row
+MultiConcatArray[1] := i_StringsArray[ElaboratingIndex][1];
+MultiConcatArray[2] := ' ; ';
+MultiConcatArray[3] := i_StringsArray[ElaboratingIndex][2];
+MultiConcatArray[4] := '$L';
+	
+//Writing row to multiconcat
+fb_MultiConcat.i_StringsArray  := MultiConcatArray;
+fb_MultiConcat.i_StringsNumber := 4;
+fb_MultiConcat.i_Enable        := TRUE;
+	
+//Check for multiconcat done
+IF fb_MultiConcat.o_String <> '' THEN
+	FullString              := fb_MultiConcat.o_String;
+	fb_MultiConcat.i_Enable := FALSE;
+	CaseWrite := 5;
+END_IF
+		
+5: //Writing row to file
+	fb_FileWrite.hFile := HeaderFile;
+	fb_FileWrite.pWriteBuff := ADR(FullString);
+	fb_FileWrite.cbWriteLen := LEN(FullString);
+	fb_FileWrite.tTimeout := T#5S;
+	fb_FileWrite.bExecute := TRUE;
+	IF fb_FileWrite.bBusy = TRUE THEN
+		CaseWrite := 6;
+	END_IF
+	
+6: //Check for errors
+IF fb_FileWrite.bBusy = FALSE AND fb_FileWrite.bError = FALSE THEN
+	fb_FileWrite.bExecute := FALSE;
+	ElaboratingIndex := ElaboratingIndex + 1;
+	CaseWrite := 7;
+END_IF
+
+7: //Check for another row
+IF ElaboratingIndex <= 100 THEN
+	CaseWrite := 4;
+	ELSE
+		CaseWrite := 8;
+END_IF
+
+8: //File close
+fb_FileClose.hFile    := HeaderFile;
+fb_FileClose.tTimeout := T#5S;
+fb_FileClose.bExecute := TRUE;
+IF fb_FileClose.bBusy = TRUE THEN
+	CaseWrite := 9;
+END_IF
+
+9: //Check for errors
+IF fb_FileClose.bBusy = FALSE AND fb_FileClose.bError = FALSE THEN
+	fb_FileClose.bExecute := FALSE;
+	o_Done                 := TRUE;
+	CaseWrite          := 10;
+END_IF
+
+10: //Wait for enable remove
+IF i_Enable = FALSE THEN
+	CaseWrite := 0;
+END_IF
+END_CASE

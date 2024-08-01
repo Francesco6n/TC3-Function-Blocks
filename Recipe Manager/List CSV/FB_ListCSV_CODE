@@ -1,0 +1,77 @@
+//Function blocks enable
+fb_FileSearch ();
+
+//Procedure reset
+IF i_Enable = FALSE THEN
+	fb_FileSearch.bExecute := FALSE;
+	o_Done                 := FALSE;
+	CaseSearch             := 0;
+END_IF
+
+//Enable check
+IF i_Enable = TRUE AND CaseSearch = 0 THEN
+	CaseSearch := 1;
+END_IF
+
+//Case start
+CASE CaseSearch OF
+1: //Function block parametrizing
+fb_FileSearch.sPathName  := CONCAT(i_Directory,'*.*');
+fb_FileSearch.eCmd       := eEnumCmd_First;
+fb_FileSearch.pFindList  := ADR(FileList);
+fb_FileSearch.cbFindList := SIZEOF(FileList);
+fb_FileSearch.tTimeout   := T#5S;
+fb_FileSearch.bExecute   := TRUE;
+CaseSearch             := 2;
+
+2: //File search
+fb_FileSearch.bExecute := FALSE;
+fb_FileSearch.bExecute := TRUE;
+CaseSearch           := 3;
+
+3: //Wait for files found
+fb_FileSearch.bExecute := FALSE;
+IF fb_FileSearch.bBusy = FALSE THEN
+	IF fb_FileSearch.bError = FALSE THEN
+		IF fb_FileSearch.bEOE = FALSE THEN
+			fb_FileSearch.eCmd := eEnumCmd_Next;
+			CaseSearch := 2;
+		ELSE
+			CaseSearch    := 4;
+			WritingIndex := 0;
+		END_IF
+	END_IF
+END_IF
+
+4: //Array cleaning
+FOR CleaningIndex := 0 TO 99 DO
+	TemporaryArray[CleaningIndex] := '';
+	o_Array[CleaningIndex]         := '';
+END_FOR
+IF CleaningIndex > 99 THEN
+	CaseSearch := 5;
+END_IF
+
+5: (*SEARCH FILERING*)
+FOR SearchIndex := 0 TO 99 DO
+	//Search for csv files only
+	IF FIND(FileList[SearchIndex].sFileName,'CSV') <> 0 THEN
+		//Filename copy
+		TemporaryArray[WritingIndex] := FileList[SearchIndex].sFileName;
+		//Search for divider position
+		DivisorPosition := FIND(TemporaryArray[WritingIndex],'.');
+		//Extensions remove
+		o_Array[WritingIndex] := DELETE(TemporaryArray[WritingIndex],4, DivisorPosition);
+		WritingIndex := WritingIndex + 1;
+	END_IF
+END_FOR
+IF SearchIndex > 99 THEN
+	o_Done      := TRUE;
+	CaseSearch := 6;
+END_IF
+
+6: //Wait for enable remove
+IF i_Enable = FALSE THEN
+	CaseSearch := 0;
+END_IF
+END_CASE

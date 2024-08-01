@@ -1,0 +1,6 @@
+//Call of recipe list funzion block
+fb_ListCSV(
+	i_Enable    := (*BUTTON OR SIGNAL*), 
+	i_Directory := 'C:/Recipes/', 
+	o_Array => ListArray, 
+	o_Done  => );

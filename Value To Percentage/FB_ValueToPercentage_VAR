@@ -1,0 +1,18 @@
+FUNCTION_BLOCK FB_ValueToPercentage
+
+VAR_INPUT
+	//Parameters
+	i_ActualValue : REAL;
+	i_MinValue    : REAL;
+	i_MaxValue    : REAL;
+END_VAR
+
+VAR_OUTPUT
+	//Data
+	o_Percentage : REAL;
+END_VAR
+
+VAR
+	//Temporary
+	TempPercentage : REAL;
+END_VAR

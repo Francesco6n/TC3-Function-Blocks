@@ -1,0 +1,22 @@
+//Call of proportional value function block
+fb_PropValve(
+	i_Name                := 'Valve 1', 
+	i_Emergency           := (*EMERGENCY PB OR FENCE FDBK*), //For example, if i open the door or if i push the emg, the valve will close
+	i_Enable              := (*SIGNAL OR SELECTOR*),         //For example, run only if motor is running
+	i_ActualTemperature   := (*ACTUAL TEMPERATURE*), 
+	i_TemperatureSetPoint := (*DESIDERED SETPOINT*), 
+	i_ActualPosition      := (*ANALOG INPUT*), 
+	i_MinimumRAW_In       := 0, 
+	i_MaximumRaw_In       := 32767, 
+	i_MinimumRAW_Out      := 0, 
+	i_MaximumRAW_Out      := 32767, 
+	i_PositionTollerance  := 5,                              //Express this value in percentage
+	i_PositioningTimeout  := T#30S, 
+	i_CycleTime           := 0.1,                            //This sould not be less than the plc cycletime
+	i_KP                  := 1.0, 
+	i_TN                  := 3.0, 
+	i_TV                  := 0.2, 
+	o_SetPoint           => (*ANALOG OUTPUT*), 
+	o_ActualPositionPerc => , 
+	o_Errors             => , 
+	o_Error              => );

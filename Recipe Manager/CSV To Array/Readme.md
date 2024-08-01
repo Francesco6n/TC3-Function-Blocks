@@ -1,0 +1,1 @@
+This function block is used to extract values from a recipe created with the FB_ArrayToCSV function block. The values are written to an array of strings, which must then be converted to the desired data.

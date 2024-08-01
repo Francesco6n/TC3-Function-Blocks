@@ -1,0 +1,171 @@
+//Call list recipe function block
+fb_ListCSV(
+	i_Enable    := , 
+	i_Directory := 'C:/Recipes/', 
+	o_Array => , 
+	o_Done  => );
+	
+//Call of recipe load function block
+fb_CSVToArray(
+	i_Enable    := , 
+	i_Directory := 'C:/Recipes/', 
+	i_FileName  := RecipeName, 
+	o_Array => , 
+	o_Done  => );
+	
+//Call of recipe save function block
+fb_ArrayToCSV(
+	i_Enable       := , 
+	i_Directory    := 'C:/Recipes/', 
+	i_FileName     := RecipeName, 
+	i_StringsArray := DataArray2, 
+	o_Done => );
+	
+//Call of recipe delete function block
+fb_DeleteCSV(
+	i_Enable    := , 
+	i_Directory := 'C:/Recipes/', 
+	i_FileName  := RecipeName, 
+	o_End => );
+
+
+
+
+
+
+
+
+
+
+//-----------------------------------------------------------------------------------------------------------------------------------------------------------
+//-----------------------------------------------------------------------------------------------------------------------------------------------------------
+//-----------------------------------------------------------------------------------------------------------------------------------------------------------
+(*We suppose that in C:/Recipes/ we have 4 recipes: 
+	Recipe1.csv, 
+	Recipe2.csv, 
+	Recipe3.csv,
+	Recipe4.csv*)
+
+(*We start generating the list*)
+LoadList := TRUE; //This will trigger the "CaseList" (see below)
+
+(*After the list is done, we have an array wich contains all the recipes in the folder*)
+//ListArray[0] will be Recipe1
+//ListArray[1] will be Recipe2
+//ListArray[2] will be Recipe3
+//ListArray[3] will be Recipe4
+
+(*We choose "Recipe2", the 2nd record of the array and we load it*)
+RecipeName := ListArray[1]; //The name of the recipe to load, also works with "RecipeName := Recipe2"
+LoadRecipe := TRUE;         //This will trigger the "CaseLoad" (see below)
+
+(*After loading the data from the recipe, we load it into PLC*)
+FOR IndexLoad := 1 TO 100 DO
+	RecipeData.DataArray[IndexLoad][2] := DataArray[IndexLoad]; //The array in the GVL is multidimensional: [x][o] is for the name of the parameter, [o][x] is for the data
+	RecipeData.DataArray2[IndexLoad] := STRING_TO_REAL(DataArray[IndexLoad]); //We can also use 2 array in the GVL, 1 for the names, 1 for the data
+END_FOR
+
+(*We change some data in our GVL data array, like this*)
+FOR IndexModify := 1 TO 100 DO
+	RecipeData.DataArray[IndexModify][2] := REAL_TO_STRING((STRING_TO_REAL(RecipeData.DataArray[IndexModify][2])*2)); //Example with multidimensional array
+	RecipeData.DataArray2[IndexModify] := RecipeData.DataArray2[IndexModify] * 2; //Example with standard data array
+END_FOR
+
+(*After data change, we save a new recipe*)
+RecipeName := 'Newrecipe'; //Name of the recipe to save
+SaveRecipe := TRUE;        //This will trigger the "CaseSave" (see below)
+
+(*After recipe saved, we delete the original recipe*)
+RecipeName := ListArray[1]; //The name of the recipe to delete, also works with "RecipeName := Recipe2"
+DeleteRecipe := TRUE;       //This will trigger the "CaseDelete" (see below)
+//-----------------------------------------------------------------------------------------------------------------------------------------------------------
+//-----------------------------------------------------------------------------------------------------------------------------------------------------------
+//-----------------------------------------------------------------------------------------------------------------------------------------------------------
+
+
+
+
+
+
+
+
+
+
+//Recipe list case enable
+IF LoadList = TRUE AND CaseList = 0 THEN
+	CaseList := 1;
+END_IF
+
+//Case start
+CASE CaseList OF
+1: //Load of the list
+fb_ListCSV.i_Enable := TRUE;
+CaseList := 2;
+
+2: //Loading done
+IF fb_ListCSV.o_Done = TRUE THEN
+	ListArray := fb_ListCSV.o_Array;
+	fb_ListCSV.i_Enable := FALSE;
+	LoadList := FALSE;
+	CaseList := 0;
+END_IF
+END_CASE
+
+//Recipe load case enable
+IF LoadRecipe = TRUE AND CaseLoad = 0 THEN
+	CaseLoad := 1;
+END_IF
+
+//Case start
+CASE CaseLoad OF
+1: //Load of the recipe
+fb_CSVToArray.i_Enable := TRUE;
+CaseLoad := 2;
+
+2: //Loading done
+IF fb_CSVToArray.o_Done = TRUE THEN
+	DataArray := fb_CSVToArray.o_Array;
+	fb_CSVToArray.i_Enable := FALSE;
+	LoadRecipe := FALSE;
+	CaseLoad := 0;
+END_IF
+END_CASE
+
+//Recipe save case enable
+IF SaveRecipe = TRUE AND CaseSave = 0 THEN
+	CaseSave := 1;
+END_IF
+
+//Case start
+CASE CaseSave OF
+1: //Save of the recipe
+RecipeName := 'New_recipe';
+fb_ArrayToCSV.i_Enable := TRUE;
+CaseSave := 2;
+
+2: //Save done
+IF fb_ArrayToCSV.o_Done = TRUE THEN
+	fb_ArrayToCSV.i_Enable := FALSE;
+	SaveRecipe := FALSE;
+	CaseSave := 0;
+END_IF
+END_CASE
+
+//Recipe delete case enable
+IF DeleteRecipe = TRUE AND CaseDelete = 0 THEN
+	CaseDelete := 1;
+END_IF
+
+//Case start
+CASE CaseDelete OF
+1: //Delete of the recipe
+fb_DeleteCSV.i_Enable := TRUE;
+CaseDelete := 2;
+
+2: //Recipe deleted
+IF fb_DeleteCSV.o_End = TRUE THEN
+	fb_DeleteCSV.i_Enable := FALSE;
+	DeleteRecipe := FALSE;
+	CaseDelete := 0;
+END_IF
+END_CASE

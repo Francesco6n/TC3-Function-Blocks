@@ -1,0 +1,106 @@
+//Function block enable
+fb_FileOpen    ();
+fb_MultiConcat ();
+fb_FileRead    ();
+fb_FileClose   ();
+
+//Enable check
+IF i_Enable = TRUE AND CaseRead = 0 AND i_FileName <> '' THEN
+	CaseRead := 1;
+END_IF
+
+//Case start
+CASE CaseRead OF
+
+1: //Generating full directory
+MultiConcatArray[1] := i_Directory;
+MultiConcatArray[2] := i_FileName;
+MultiConcatArray[3] := '.';
+MultiConcatArray[4] := 'CSV';
+
+//Writing sting to multiconcat
+fb_MultiConcat.i_StringsArray  := MultiConcatArray;
+fb_MultiConcat.i_StringsNumber := 4;
+fb_MultiConcat.i_Enable        := TRUE;
+
+//Check for multiconcat done
+IF fb_MultiConcat.o_String <> '' THEN
+	ElaboratedDirectory     := fb_MultiConcat.o_String;
+	fb_MultiConcat.i_Enable := FALSE;
+	CaseRead                := 2;
+END_IF
+
+2: //File opening
+fb_FileOpen.sPathName := ElaboratedDirectory;
+fb_FileOpen.nMode     := FOPEN_MODEREAD;
+fb_FileOpen.ePath     := PATH_GENERIC;
+fb_FileOpen.tTimeout  := T#5S;
+fb_FileOpen.bExecute  := TRUE;
+IF fb_FileOpen.bBusy = TRUE THEN
+	CaseRead := 3;
+END_IF
+
+3: //Check for errors
+IF fb_FileOpen.bBusy = FALSE AND fb_FileOpen.bError = FALSE AND fb_FileOpen.hFile <> 0 THEN
+	HeaderFile           := fb_FileOpen.hFile;
+	fb_FileOpen.bExecute := FALSE;
+	ReadingIndex         := 1;
+	CaseRead          := 4;
+END_IF
+
+4: //Reading string
+fb_FileRead.hFile         := HeaderFile;
+fb_FileRead.tTimeout      := T#5S;
+fb_FileRead.bExecute      := TRUE;
+IF fb_FileRead.bBusy = TRUE THEN
+	CaseRead := 5;
+END_IF
+
+5: //Check for string readed correctly and jump for a new read
+IF fb_FileRead.bBusy = FALSE AND fb_FileRead.bError = FALSE THEN
+	ReadingArray[ReadingIndex] := fb_FileRead.sLine;
+	fb_FileRead.bExecute      := FALSE;
+	IF fb_FileRead.bEOF = TRUE THEN
+		CaseRead := 6;
+		ELSE
+			ReadingIndex := ReadingIndex + 1;
+			CaseRead  := 4;
+	END_IF
+END_IF
+
+6://File close
+fb_FileClose.hFile    := HeaderFile;
+fb_FileClose.tTimeout := T#5S;
+fb_FileClose.bExecute := TRUE;
+IF fb_FileClose.bBusy = TRUE THEN
+	CaseRead := 7;
+END_IF
+
+7: //Check for errors
+IF fb_FileClose.bBusy = FALSE AND fb_FileClose.bError = FALSE THEN
+	fb_FileClose.bExecute := FALSE;
+	CaseRead            := 8;
+END_IF
+
+8: (*STRINGS CLEANING*)
+FOR AnalysisIndex := 1 TO 100 DO
+	//Search for position of ";"
+	DivisorPosition := FIND(ReadingArray[AnalysisIndex],';');
+	//Deleting characters until ";" reached
+	ReadingArray[AnalysisIndex] := DELETE(ReadingArray[AnalysisIndex],DivisorPosition + 1, 1);
+	//Search for position of "$N"
+	EndRowPosition := FIND(ReadingArray[AnalysisIndex],'$N');
+	//Deleting end row characters
+	o_Array[AnalysisIndex] := DELETE(ReadingArray[AnalysisIndex],2, EndRowPosition);
+END_FOR
+IF AnalysisIndex > 100 THEN
+	CaseRead := 9;
+END_IF
+
+9: //Wait for enable remove
+o_Done := TRUE;
+IF i_Enable = FALSE THEN
+	o_Done   := FALSE;
+	CaseRead := 0;
+END_IF
+END_CASE

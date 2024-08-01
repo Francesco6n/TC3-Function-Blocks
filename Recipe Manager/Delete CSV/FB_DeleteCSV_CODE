@@ -1,0 +1,59 @@
+//Function blocks enable
+fb_MultiConcat ();
+fb_FileDelete  ();
+
+//Procedure reset
+IF i_Enable = FALSE THEN
+	fb_MultiConcat.i_Enable := FALSE;
+	fb_FileDelete.bExecute  := FALSE;
+	o_End                   := FALSE;
+	CaseDelete              := 0;
+END_IF
+
+//Enable check
+IF i_Enable = TRUE AND CaseDelete = 0 AND i_FileName <> '' THEN
+	CaseDelete := 1;
+END_IF
+
+//Case start
+CASE CaseDelete OF
+
+1: //Generating full directory
+MultiConcatArray[1] := i_Directory;
+MultiConcatArray[2] := i_FileName;
+MultiConcatArray[3] := '.';
+MultiConcatArray[4] := 'CSV';
+
+//Writing full directory to multiconcat
+fb_MultiConcat.i_StringsArray  := MultiConcatArray;
+fb_MultiConcat.i_StringsNumber := 4;
+fb_MultiConcat.i_Enable        := TRUE;
+
+//Check for multiconcat done
+IF fb_MultiConcat.o_String <> '' THEN
+	ElaboratedDirectory     := fb_MultiConcat.o_String;
+	fb_MultiConcat.i_Enable := FALSE;
+	CaseDelete              := 2;
+END_IF
+
+2: //File delete
+fb_FileDelete.sPathName := ElaboratedDirectory;
+fb_FileDelete.ePath     := PATH_GENERIC;
+fb_FileDelete.tTimeout  := T#5S;
+fb_FileDelete.bExecute  := TRUE;
+IF fb_FileDelete.bBusy = TRUE THEN
+	CaseDelete := 3;
+END_IF
+
+3: //Check for errors
+IF fb_FileDelete.bBusy = FALSE AND fb_FileDelete.bError = FALSE THEN
+	fb_FileDelete.bExecute := FALSE;
+	o_End                   := TRUE;
+	CaseDelete        := 4;
+END_IF
+
+4: //Wait for enable remove
+IF i_Enable = FALSE THEN
+	CaseDelete := 0;
+END_IF
+END_CASE

@@ -1,0 +1,39 @@
+FUNCTION_BLOCK FB_StableValue
+
+VAR_INPUT
+	//Commands
+	i_Enable : BOOL;
+	
+	//Parameters
+	i_ActualValue   : REAL;
+	i_Cue           : REAL;
+	i_Tolerance     : REAL;
+	i_Interval      : TIME;
+	i_CueTimeout    : TIME;
+	i_StableTimeout : TIME;
+END_VAR
+
+VAR_OUTPUT
+	//Status
+	o_Stable : BOOL;
+	
+	//Errors
+	o_CueError    : BOOL;
+	o_StableError : BOOL;
+END_VAR
+
+VAR
+	//Cases
+	CaseStable : INT;
+	
+	//Temporary
+	PositiveCue  : REAL;
+	NegativeCue  : REAL;
+	MaxTolerance : REAL;
+	MinTolerance : REAL;
+	
+	//Timers
+	IntervalTimer : TON;
+	CueTimer      : TON;
+	StableTimer   : TON;
+END_VAR

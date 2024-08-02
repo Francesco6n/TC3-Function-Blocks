@@ -1,0 +1,25 @@
+//Call of stable value function block -Example1: Emptying a tank
+fb_StableValue(
+	i_Enable        := (*VALVE OPEN*), 
+	i_ActualValue   := (*ANALOG INPUT*),  //This can be either a load cell value or a level sensor value
+	i_Cue           := 1000,              //How many steps are necessary to know if the emptying is started
+	i_Tolerance     := 100,               //This is the final tolerance. If the value is +/- the same of the previous value, the procedure ends.
+	i_Interval      := T#10S,             //The time to wait before a new check
+	i_CueTimeout    := T#10S,             //If the cue is not surpassed in time, il will return an error. (Tank not emptying)
+	i_StableTimeout := T#10S,             //The value should be stable all this time to complete the procedure.
+	o_Stable      => ,                    //The value is stable -> tank is not emptying anymore
+	o_CueError    => ,                    //The tank is clogged or the valve is not open or the emptying speed is too low
+	o_StableError => );                   //The value is not stabilizing
+	
+//Call of stable value function block -Example2: Closing a gripper
+fb_StableValue(
+	i_Enable        := (*CLOSING COMMAND*), 
+	i_ActualValue   := (*ANALOG INPUT*),  //This can be an analog position sensor on the gripper
+	i_Cue           := 1000,              //How many steps are necessary to know if closing is started
+	i_Tolerance     := 100,               //This is the final tolerance. If the value is +/- the same of the previous value, the procedure ends.
+	i_Interval      := T#10S,             //The time to wait before a new check
+	i_CueTimeout    := T#10S,             //If the cue is not surpassed in time, il will return an error. (Gripper not closing)
+	i_StableTimeout := T#10S,             //The value should be stable all this time to complete the procedure.
+	o_Stable      => ,                    //The value is stable -> gripper is not closing anymore
+	o_CueError    => ,                    //The gripper is not closing or the valve is not working or the closing speed is too low
+	o_StableError => );                   //The value is not stabilizing

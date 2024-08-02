@@ -1,0 +1,51 @@
+//Timers declaration
+IntervalTimer (IN := CaseStable = 400, PT := i_Interval);
+CueTimer      (IN := CaseStable = 200, PT := i_CueTimeout, Q => o_CueError);
+StableTimer   (IN := CaseStable > 300 AND CaseStable < 500, PT := i_StableTimeout, Q => o_StableError);
+
+//Enable check
+IF i_Enable = TRUE AND CaseStable = 0 THEN
+	CaseStable := 100;
+END_IF
+
+//Procedure reset
+IF i_Enable = FALSE THEN
+	CaseStable := 0;
+	o_Stable     := FALSE;
+END_IF
+
+//Case start
+CASE CaseStable OF
+100: //Computing cues
+PositiveCue := i_ActualValue + i_Cue;
+NegativeCue := i_ActualValue - i_Cue;
+CaseStable  := 200;
+
+200: //Wait for cue passed
+IF i_ActualValue > PositiveCue OR i_ActualValue < NegativeCue THEN
+	CaseStable := 300;
+END_IF
+IF i_Cue = 0 THEN
+	CaseStable := 300;
+END_IF
+
+300: //Computing tolerances
+MaxTolerance := i_ActualValue + i_Tolerance;
+MinTolerance := i_ActualValue - i_Tolerance;
+CaseStable := 400;
+
+400: //Wait for interval
+IF IntervalTimer.Q = TRUE THEN
+	CaseStable := 500;
+END_IF
+
+500: //Check for value in tolerance
+IF i_ActualValue > MinTolerance AND i_ActualValue < MaxTolerance THEN
+	CaseStable := 600;
+	ELSE
+	CaseStable := 300;
+END_IF
+
+600: //Stable
+o_Stable := TRUE;
+END_CASE

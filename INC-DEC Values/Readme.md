@@ -1,0 +1,1 @@
+This function block is used to determine when a certain value stops increasing or decreasing. It is useful for determining the filling or emptying of a bin, the opening or closing of a gripper, the movement of a press, the consent of a scale, etc.
